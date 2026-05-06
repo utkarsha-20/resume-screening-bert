@@ -1,0 +1,27 @@
+# Virtual environment
+.venv/
+
+# Output files
+output/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Hugging Face model cache
+.cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Generated scripts
+create_test_resumes.py
+
+# Editor temp files
+*.tmp.*
+*.tmp

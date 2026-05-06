@@ -1,0 +1,3 @@
+Looking for a data scientist with Python, SQL,
+machine learning, pandas, AWS, and NLP experience.
+Experience with transformers and deep learning preferred.
