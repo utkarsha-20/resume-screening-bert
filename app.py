@@ -64,22 +64,24 @@ if not st.session_state["logged_in"]:
     </style>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="login-wrap">', unsafe_allow_html=True)
-    st.markdown('<div class="login-title">HireMatch 🎯</div>', unsafe_allow_html=True)
-    st.markdown('<div class="login-sub">Sign in to access the resume screener</div>', unsafe_allow_html=True)
+    _, col, _ = st.columns([1, 2, 1])
+    with col:
+        st.markdown('<div class="login-wrap">', unsafe_allow_html=True)
+        st.markdown('<div class="login-title">HireMatch 🎯</div>', unsafe_allow_html=True)
+        st.markdown('<div class="login-sub">Sign in to access the resume screener</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    username = st.text_input("Username", placeholder="Enter username")
-    password = st.text_input("Password", placeholder="Enter password", type="password")
+        username = st.text_input("Username", placeholder="Enter username")
+        password = st.text_input("Password", placeholder="Enter password", type="password")
 
-    if st.button("Sign in", use_container_width=True):
-        if username in USERS and USERS[username] == password:
-            st.session_state["logged_in"] = True
-            st.session_state["username"] = username
-            st.rerun()
-        else:
-            st.markdown('<div class="login-err">Incorrect username or password.</div>', unsafe_allow_html=True)
+        if st.button("Sign in", use_container_width=True):
+            if username in USERS and USERS[username] == password:
+                st.session_state["logged_in"] = True
+                st.session_state["username"] = username
+                st.rerun()
+            else:
+                st.markdown('<div class="login-err">Incorrect username or password.</div>', unsafe_allow_html=True)
 
-    st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
 st.markdown("""
@@ -363,10 +365,10 @@ def to_excel(all_results: dict) -> bytes:
 
 # ── Hero ─────────────────────────────────────────────────────────────────────
 
-hero_left, hero_right = st.columns([5, 1])
-with hero_left:
-    st.markdown("""
-    <div class="hero">
+st.markdown(f"""
+<div class="hero">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start">
+    <div>
       <div class="hero-title">HireMatch 🎯</div>
       <div class="hero-sub">
         Screen resumes in seconds. Rank candidates by semantic fit and skill coverage — not just keyword count.
@@ -379,12 +381,16 @@ with hero_left:
         <span class="hero-pill">📊 Export to Excel</span>
       </div>
     </div>
-    """, unsafe_allow_html=True)
-with hero_right:
-    st.markdown(f'<div style="text-align:right;font-size:13px;color:#7a7a72;padding-top:8px">👤 {st.session_state.get("username","")}</div>', unsafe_allow_html=True)
-    if st.button("Sign out", key="logout"):
-        st.session_state.clear()
-        st.rerun()
+    <div style="font-size:13px;color:#fff;opacity:0.85;white-space:nowrap;padding-top:4px">
+      👤 {st.session_state.get("username","")}
+    </div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+if st.button("Sign out", key="logout"):
+    st.session_state.clear()
+    st.rerun()
 
 # ── How it works ─────────────────────────────────────────────────────────────
 
