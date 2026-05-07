@@ -420,7 +420,36 @@ st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 
 # ── Guard ────────────────────────────────────────────────────────────────────
 
-if not run_clicked:
+if run_clicked:
+    if not jd_texts:
+        st.error("Please provide at least one job description.")
+        st.stop()
+
+    if not resume_files:
+        st.error("Please upload at least one resume.")
+        st.stop()
+
+    resumes = {}
+    for f in resume_files:
+        suffix = os.path.splitext(f.name)[1] or ".pdf"
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+            tmp.write(f.read())
+            tmp_path = tmp.name
+        text = extract_text(tmp_path)
+        if text.strip():
+            resumes[f.name] = text
+
+    if not resumes:
+        st.error("Could not extract text from the uploaded resumes.")
+        st.stop()
+
+    all_results = {}
+    for jd_name, jd_text in jd_texts.items():
+        all_results[jd_name] = run_screening(resumes, jd_text)
+
+    st.session_state["all_results"] = all_results
+
+if "all_results" not in st.session_state:
     st.markdown("""
     <div class="empty-state">
       <div class="big">📄</div>
@@ -429,33 +458,7 @@ if not run_clicked:
     """, unsafe_allow_html=True)
     st.stop()
 
-if not jd_texts:
-    st.error("Please provide at least one job description.")
-    st.stop()
-
-if not resume_files:
-    st.error("Please upload at least one resume.")
-    st.stop()
-
-resumes = {}
-for f in resume_files:
-    suffix = os.path.splitext(f.name)[1] or ".pdf"
-    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
-        tmp.write(f.read())
-        tmp_path = tmp.name
-    text = extract_text(tmp_path)
-    if text.strip():
-        resumes[f.name] = text
-
-if not resumes:
-    st.error("Could not extract text from the uploaded resumes.")
-    st.stop()
-
-# ── Run screening for all JDs ─────────────────────────────────────────────────
-
-all_results = {}
-for jd_name, jd_text in jd_texts.items():
-    all_results[jd_name] = run_screening(resumes, jd_text)
+all_results = st.session_state["all_results"]
 
 # ── Score filter ──────────────────────────────────────────────────────────────
 
