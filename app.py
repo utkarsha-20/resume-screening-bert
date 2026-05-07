@@ -119,11 +119,23 @@ if not st.session_state["logged_in"]:
     st.markdown(BASE_CSS, unsafe_allow_html=True)
     st.markdown("""
     <style>
-      .block-container { padding: 0 !important; max-width: 100% !important; }
-      [data-testid="stAppViewContainer"] { background: #F6F4E8 !important; }
+      html, body { overflow: hidden !important; height: 100vh !important; }
+      [data-testid="stAppViewContainer"] {
+        background: #F6F4E8 !important;
+        height: 100vh !important;
+        overflow: hidden !important;
+      }
+      [data-testid="stMain"] { height: 100vh !important; overflow: hidden !important; }
+      .block-container {
+        padding: 0 !important;
+        max-width: 100% !important;
+        height: 100vh !important;
+        overflow: hidden !important;
+      }
+      [data-testid="stMain"] > div:first-child { height: 100vh !important; }
 
       .login-form-wrap {
-        max-width: 360px;
+        max-width: 340px;
         margin: 0 auto;
         padding: 0 8px;
       }
@@ -131,22 +143,24 @@ if not st.session_state["logged_in"]:
         background: #fff !important;
         border: 1px solid #d8d4c8 !important;
         border-radius: 6px !important;
-        padding: 10px 12px !important;
-        font-size: 14px !important;
+        padding: 8px 12px !important;
+        font-size: 13px !important;
       }
       .login-form-wrap [data-testid="stTextInput"] label {
         font-size: 12px !important;
         font-weight: 500 !important;
         color: #2e2e2e !important;
+        padding-bottom: 2px !important;
       }
+      .login-form-wrap [data-testid="stTextInput"] { margin-bottom: -8px; }
       .login-form-wrap div[data-testid="stButton"] > button {
         background: #2e2e2e !important;
         color: #fff !important;
         border: 1px solid #2e2e2e !important;
         border-radius: 6px !important;
-        font-size: 14px !important;
+        font-size: 13px !important;
         font-weight: 500 !important;
-        padding: 10px 18px !important;
+        padding: 8px 18px !important;
         width: 100%;
       }
       .login-form-wrap div[data-testid="stButton"] > button:hover {
@@ -164,39 +178,38 @@ if not st.session_state["logged_in"]:
 
     with left:
         left_html = (
-            '<div style="background:#DC9B9B;min-height:100vh;padding:48px 44px;'
-            'display:flex;flex-direction:column;justify-content:space-between;color:#fff">'
-            '<div style="display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600">'
-            '<div style="width:28px;height:28px;background:#fff;color:#DC9B9B;'
+            '<div style="background:#DC9B9B;height:100vh;padding:32px 36px;box-sizing:border-box;'
+            'display:flex;flex-direction:column;justify-content:space-between;color:#fff;overflow:hidden">'
+            '<div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600">'
+            '<div style="width:26px;height:26px;background:#fff;color:#DC9B9B;'
             'border-radius:6px;display:inline-flex;align-items:center;justify-content:center;'
             'font-weight:700;font-size:13px">H</div>HireMatch</div>'
             '<div style="max-width:380px">'
-            '<div style="font-size:13px;font-weight:500;opacity:0.85;margin-bottom:14px;'
+            '<div style="font-size:11px;font-weight:500;opacity:0.85;margin-bottom:10px;'
             'text-transform:uppercase;letter-spacing:0.4px">Recruiting workspace</div>'
-            '<div style="font-size:26px;font-weight:600;line-height:1.35;margin-bottom:18px">'
+            '<div style="font-size:22px;font-weight:600;line-height:1.3;margin-bottom:12px">'
             'Screen and rank candidates the way your team already works.</div>'
-            '<div style="font-size:14px;line-height:1.6;opacity:0.92;margin-bottom:28px">'
-            'Upload resumes, paste a job description, and get a ranked shortlist in seconds — '
-            'with skill-match analysis and an Excel export when you need to share it.</div>'
-            '<div style="background:#ffffff14;border:1px solid #ffffff33;border-radius:8px;padding:14px 16px">'
-            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
-            '<div style="font-size:12px;opacity:0.85">Senior Data Scientist · 47 candidates</div>'
-            '<div style="font-size:11px;background:#ffffff22;border:1px solid #ffffff33;'
-            'border-radius:3px;padding:2px 8px">Live</div></div>'
-            '<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:500">'
+            '<div style="font-size:13px;line-height:1.55;opacity:0.92;margin-bottom:18px">'
+            'Upload resumes, paste a job description, and get a ranked shortlist in seconds.</div>'
+            '<div style="background:#ffffff14;border:1px solid #ffffff33;border-radius:8px;padding:12px 14px">'
+            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+            '<div style="font-size:11px;opacity:0.85">Senior Data Scientist · 47 candidates</div>'
+            '<div style="font-size:10px;background:#ffffff22;border:1px solid #ffffff33;'
+            'border-radius:3px;padding:1px 7px">Live</div></div>'
+            '<div style="display:flex;justify-content:space-between;font-size:12px;font-weight:500">'
             '<span>Priya Nair</span><span>91%</span></div>'
-            '<div style="background:#ffffff22;height:3px;border-radius:2px;margin:6px 0">'
+            '<div style="background:#ffffff22;height:3px;border-radius:2px;margin:5px 0">'
             '<div style="background:#fff;width:91%;height:3px;border-radius:2px"></div></div>'
-            '<div style="display:flex;justify-content:space-between;font-size:13px;opacity:0.85">'
+            '<div style="display:flex;justify-content:space-between;font-size:12px;opacity:0.85">'
             '<span>Arjun Sharma</span><span>78%</span></div>'
-            '<div style="background:#ffffff22;height:3px;border-radius:2px;margin:6px 0">'
+            '<div style="background:#ffffff22;height:3px;border-radius:2px;margin:5px 0">'
             '<div style="background:#ffffffcc;width:78%;height:3px;border-radius:2px"></div></div>'
-            '<div style="display:flex;justify-content:space-between;font-size:13px;opacity:0.65">'
+            '<div style="display:flex;justify-content:space-between;font-size:12px;opacity:0.65">'
             '<span>Lina Park</span><span>62%</span></div>'
-            '<div style="background:#ffffff22;height:3px;border-radius:2px;margin:6px 0 0">'
+            '<div style="background:#ffffff22;height:3px;border-radius:2px;margin:5px 0 0">'
             '<div style="background:#ffffff99;width:62%;height:3px;border-radius:2px"></div></div>'
             '</div></div>'
-            '<div style="display:flex;justify-content:space-between;font-size:12px;opacity:0.8">'
+            '<div style="display:flex;justify-content:space-between;font-size:11px;opacity:0.8">'
             '<span>© HireMatch</span><span>v1.0 · Internal</span></div>'
             '</div>'
         )
@@ -204,19 +217,19 @@ if not st.session_state["logged_in"]:
 
     with right:
         st.markdown(
-            '<div style="min-height:100vh;display:flex;flex-direction:column;justify-content:center;'
-            'padding:48px 32px">',
+            '<div style="height:100vh;display:flex;flex-direction:column;justify-content:center;'
+            'padding:24px 24px;box-sizing:border-box;overflow:hidden">',
             unsafe_allow_html=True
         )
         st.markdown('<div class="login-form-wrap">', unsafe_allow_html=True)
 
         st.markdown(
-            '<div style="font-size:24px;font-weight:600;color:#2e2e2e;margin-bottom:6px;'
+            '<div style="font-size:22px;font-weight:600;color:#2e2e2e;margin-bottom:4px;'
             'letter-spacing:-0.3px">Welcome back</div>',
             unsafe_allow_html=True
         )
         st.markdown(
-            '<div style="font-size:13px;color:#7a7a72;margin-bottom:28px">'
+            '<div style="font-size:13px;color:#7a7a72;margin-bottom:18px">'
             'Sign in to continue to your recruiting workspace.</div>',
             unsafe_allow_html=True
         )
@@ -224,17 +237,17 @@ if not st.session_state["logged_in"]:
         username = st.text_input("Username", placeholder="e.g. hr")
         password = st.text_input("Password", placeholder="Enter password", type="password")
 
+        st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
+
         opt_l, opt_r = st.columns([1, 1])
         with opt_l:
-            st.checkbox("Remember username", value=False)
+            st.checkbox("Remember me", value=False)
         with opt_r:
             st.markdown(
                 '<div style="text-align:right;font-size:12px;color:#7a7a72;padding-top:6px">'
                 '<a href="#" style="color:#7a7a72;text-decoration:none">Need help?</a></div>',
                 unsafe_allow_html=True
             )
-
-        st.markdown('<div style="height:6px"></div>', unsafe_allow_html=True)
 
         if st.button("Sign in", use_container_width=True, key="login_btn"):
             user = USERS.get(username)
@@ -246,18 +259,18 @@ if not st.session_state["logged_in"]:
                 st.rerun()
             else:
                 st.markdown(
-                    '<div style="font-size:13px;color:#8a3a3a;background:#DC9B9B1f;'
-                    'border:1px solid #DC9B9B55;border-radius:6px;padding:9px 12px;margin-top:12px">'
+                    '<div style="font-size:12px;color:#8a3a3a;background:#DC9B9B1f;'
+                    'border:1px solid #DC9B9B55;border-radius:6px;padding:7px 10px;margin-top:8px">'
                     'Incorrect username or password.</div>',
                     unsafe_allow_html=True
                 )
 
         st.markdown(
-            '<div style="margin-top:32px;padding-top:18px;border-top:1px solid #d8d4c8">'
-            '<div style="font-size:11px;color:#7a7a72;text-transform:uppercase;'
-            'letter-spacing:0.4px;margin-bottom:10px">Demo accounts</div>'
+            '<div style="margin-top:18px;padding-top:14px;border-top:1px solid #d8d4c8">'
+            '<div style="font-size:10px;color:#7a7a72;text-transform:uppercase;'
+            'letter-spacing:0.4px;margin-bottom:6px">Demo accounts</div>'
             '<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;'
-            'color:#2e2e2e;line-height:1.9">'
+            'color:#2e2e2e;line-height:1.7">'
             '<div>admin <span style="color:#7a7a72">·</span> admin123</div>'
             '<div>hr <span style="color:#7a7a72">·</span> hr2024</div>'
             '<div>manager <span style="color:#7a7a72">·</span> manager123</div>'
