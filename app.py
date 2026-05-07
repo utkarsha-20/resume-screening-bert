@@ -216,70 +216,67 @@ if not st.session_state["logged_in"]:
         st.markdown(left_html, unsafe_allow_html=True)
 
     with right:
-        st.markdown(
-            '<div style="height:100vh;display:flex;flex-direction:column;justify-content:center;'
-            'padding:24px 24px;box-sizing:border-box;overflow:hidden">',
-            unsafe_allow_html=True
-        )
-        st.markdown('<div class="login-form-wrap">', unsafe_allow_html=True)
+        pad_l, form_col, pad_r = st.columns([1, 3, 1])
+        with form_col:
+            st.markdown('<div style="height:14vh"></div>', unsafe_allow_html=True)
+            st.markdown('<div class="login-form-wrap">', unsafe_allow_html=True)
 
-        st.markdown(
-            '<div style="font-size:22px;font-weight:600;color:#2e2e2e;margin-bottom:4px;'
-            'letter-spacing:-0.3px">Welcome back</div>',
-            unsafe_allow_html=True
-        )
-        st.markdown(
-            '<div style="font-size:13px;color:#7a7a72;margin-bottom:18px">'
-            'Sign in to continue to your recruiting workspace.</div>',
-            unsafe_allow_html=True
-        )
-
-        username = st.text_input("Username", placeholder="e.g. hr")
-        password = st.text_input("Password", placeholder="Enter password", type="password")
-
-        st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
-
-        opt_l, opt_r = st.columns([1, 1])
-        with opt_l:
-            st.checkbox("Remember me", value=False)
-        with opt_r:
             st.markdown(
-                '<div style="text-align:right;font-size:12px;color:#7a7a72;padding-top:6px">'
-                '<a href="#" style="color:#7a7a72;text-decoration:none">Need help?</a></div>',
+                '<div style="font-size:22px;font-weight:600;color:#2e2e2e;margin-bottom:4px;'
+                'letter-spacing:-0.3px">Welcome back</div>',
+                unsafe_allow_html=True
+            )
+            st.markdown(
+                '<div style="font-size:13px;color:#7a7a72;margin-bottom:18px">'
+                'Sign in to continue to your recruiting workspace.</div>',
                 unsafe_allow_html=True
             )
 
-        if st.button("Sign in", use_container_width=True, key="login_btn"):
-            user = USERS.get(username)
-            if user and user["password"] == password:
-                st.session_state["logged_in"] = True
-                st.session_state["username"] = username
-                st.session_state["role"] = user["role"]
-                st.session_state["display_name"] = user["name"]
-                st.rerun()
-            else:
+            username = st.text_input("Username", placeholder="e.g. hr")
+            password = st.text_input("Password", placeholder="Enter password", type="password")
+
+            st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
+
+            opt_l, opt_r = st.columns([1, 1])
+            with opt_l:
+                st.checkbox("Remember me", value=False)
+            with opt_r:
                 st.markdown(
-                    '<div style="font-size:12px;color:#8a3a3a;background:#DC9B9B1f;'
-                    'border:1px solid #DC9B9B55;border-radius:6px;padding:7px 10px;margin-top:8px">'
-                    'Incorrect username or password.</div>',
+                    '<div style="text-align:right;font-size:12px;color:#7a7a72;padding-top:6px">'
+                    '<a href="#" style="color:#7a7a72;text-decoration:none">Need help?</a></div>',
                     unsafe_allow_html=True
                 )
 
-        st.markdown(
-            '<div style="margin-top:18px;padding-top:14px;border-top:1px solid #d8d4c8">'
-            '<div style="font-size:10px;color:#7a7a72;text-transform:uppercase;'
-            'letter-spacing:0.4px;margin-bottom:6px">Demo accounts</div>'
-            '<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;'
-            'color:#2e2e2e;line-height:1.7">'
-            '<div>admin <span style="color:#7a7a72">·</span> admin123</div>'
-            '<div>hr <span style="color:#7a7a72">·</span> hr2024</div>'
-            '<div>manager <span style="color:#7a7a72">·</span> manager123</div>'
-            '</div></div>',
-            unsafe_allow_html=True
-        )
+            if st.button("Sign in", use_container_width=True, key="login_btn"):
+                user = USERS.get(username)
+                if user and user["password"] == password:
+                    st.session_state["logged_in"] = True
+                    st.session_state["username"] = username
+                    st.session_state["role"] = user["role"]
+                    st.session_state["display_name"] = user["name"]
+                    st.rerun()
+                else:
+                    st.markdown(
+                        '<div style="font-size:12px;color:#8a3a3a;background:#DC9B9B1f;'
+                        'border:1px solid #DC9B9B55;border-radius:6px;padding:7px 10px;margin-top:8px">'
+                        'Incorrect username or password.</div>',
+                        unsafe_allow_html=True
+                    )
 
-        st.markdown('</div>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown(
+                '<div style="margin-top:18px;padding-top:14px;border-top:1px solid #d8d4c8">'
+                '<div style="font-size:10px;color:#7a7a72;text-transform:uppercase;'
+                'letter-spacing:0.4px;margin-bottom:6px">Demo accounts</div>'
+                '<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;'
+                'color:#2e2e2e;line-height:1.7">'
+                '<div>admin <span style="color:#7a7a72">·</span> admin123</div>'
+                '<div>hr <span style="color:#7a7a72">·</span> hr2024</div>'
+                '<div>manager <span style="color:#7a7a72">·</span> manager123</div>'
+                '</div></div>',
+                unsafe_allow_html=True
+            )
+
+            st.markdown('</div>', unsafe_allow_html=True)
 
     st.stop()
 
