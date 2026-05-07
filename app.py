@@ -119,80 +119,141 @@ if not st.session_state["logged_in"]:
     st.markdown(BASE_CSS, unsafe_allow_html=True)
     st.markdown("""
     <style>
-      .login-shell {
-        display: flex;
-        min-height: calc(100vh - 80px);
-        margin: 0 -32px;
-      }
-      .login-left {
-        flex: 1;
-        background: #DC9B9B;
-        color: #fff;
-        padding: 60px 56px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-      }
-      .brand-row { font-size: 16px; font-weight: 700; letter-spacing: -0.2px; }
-      .brand-row span { opacity: 0.8; font-weight: 500; margin-left: 8px; font-size: 13px; }
-      .left-headline { font-size: 28px; font-weight: 600; line-height: 1.3; max-width: 380px; }
-      .left-foot { font-size: 12px; opacity: 0.85; }
+      .block-container { padding: 0 !important; max-width: 100% !important; }
+      [data-testid="stAppViewContainer"] { background: #F6F4E8 !important; }
 
-      .login-right {
-        flex: 1;
-        background: #F6F4E8;
-        padding: 60px 64px;
-        display: flex;
-        align-items: center;
+      .login-form-wrap {
+        max-width: 360px;
+        margin: 0 auto;
+        padding: 0 8px;
       }
-      .login-card { max-width: 360px; width: 100%; }
-      .login-h1 { font-size: 22px; font-weight: 600; color: #2e2e2e; margin-bottom: 6px; }
-      .login-p  { font-size: 13px; color: #7a7a72; margin-bottom: 28px; }
-      .login-creds {
-        margin-top: 20px;
-        font-size: 12px;
-        color: #7a7a72;
-        background: #E5EEE4;
-        border: 1px solid #cdd8cc;
-        border-radius: 6px;
-        padding: 10px 12px;
-        line-height: 1.6;
+      .login-form-wrap [data-testid="stTextInput"] input {
+        background: #fff !important;
+        border: 1px solid #d8d4c8 !important;
+        border-radius: 6px !important;
+        padding: 10px 12px !important;
+        font-size: 14px !important;
       }
-      .login-creds b { color: #2e2e2e; }
-      .login-err {
-        font-size: 13px; color: #8a3a3a;
-        background: #DC9B9B22; border: 1px solid #DC9B9B66;
-        border-radius: 5px; padding: 8px 12px; margin-top: 10px;
+      .login-form-wrap [data-testid="stTextInput"] label {
+        font-size: 12px !important;
+        font-weight: 500 !important;
+        color: #2e2e2e !important;
+      }
+      .login-form-wrap div[data-testid="stButton"] > button {
+        background: #2e2e2e !important;
+        color: #fff !important;
+        border: 1px solid #2e2e2e !important;
+        border-radius: 6px !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        padding: 10px 18px !important;
+        width: 100%;
+      }
+      .login-form-wrap div[data-testid="stButton"] > button:hover {
+        background: #1f1f1f !important;
+        border-color: #1f1f1f !important;
+      }
+      .login-form-wrap [data-testid="stCheckbox"] label {
+        font-size: 12px !important;
+        color: #7a7a72 !important;
       }
     </style>
     """, unsafe_allow_html=True)
 
-    left, right = st.columns([1, 1], gap="small")
+    left, right = st.columns([5, 6], gap="small")
+
     with left:
         st.markdown("""
-        <div style="background:#DC9B9B;color:#fff;padding:60px 48px;min-height:540px;
-                    display:flex;flex-direction:column;justify-content:space-between;
-                    border-radius:8px 0 0 8px;">
-          <div style="font-size:16px;font-weight:700">HireMatch <span style="opacity:0.8;font-weight:500;font-size:13px;margin-left:6px">Recruiting workspace</span></div>
-          <div style="font-size:26px;font-weight:600;line-height:1.35;max-width:360px">
-            Screen and rank candidates against any job description in seconds.
+        <div style="background:#DC9B9B;min-height:100vh;padding:48px 44px;
+                    display:flex;flex-direction:column;justify-content:space-between;color:#fff">
+
+          <div style="display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600">
+            <div style="width:28px;height:28px;background:#fff;color:#DC9B9B;
+                        border-radius:6px;display:inline-flex;align-items:center;justify-content:center;
+                        font-weight:700;font-size:13px">H</div>
+            HireMatch
           </div>
-          <div style="font-size:12px;opacity:0.85">© HireMatch · Internal use only</div>
+
+          <div style="max-width:380px">
+            <div style="font-size:13px;font-weight:500;opacity:0.85;margin-bottom:14px;
+                        text-transform:uppercase;letter-spacing:0.4px">Recruiting workspace</div>
+            <div style="font-size:26px;font-weight:600;line-height:1.35;margin-bottom:18px">
+              Screen and rank candidates the way your team already works.
+            </div>
+            <div style="font-size:14px;line-height:1.6;opacity:0.92;margin-bottom:28px">
+              Upload resumes, paste a job description, and get a ranked shortlist in seconds —
+              with skill-match analysis and an Excel export when you need to share it.
+            </div>
+
+            <div style="background:#ffffff14;border:1px solid #ffffff33;border-radius:8px;padding:14px 16px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <div style="font-size:12px;opacity:0.85">Senior Data Scientist · 47 candidates</div>
+                <div style="font-size:11px;background:#ffffff22;border:1px solid #ffffff33;
+                            border-radius:3px;padding:2px 8px">Live</div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:500">
+                <span>Priya Nair</span><span>91%</span>
+              </div>
+              <div style="background:#ffffff22;height:3px;border-radius:2px;margin:6px 0">
+                <div style="background:#fff;width:91%;height:3px;border-radius:2px"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;opacity:0.85">
+                <span>Arjun Sharma</span><span>78%</span>
+              </div>
+              <div style="background:#ffffff22;height:3px;border-radius:2px;margin:6px 0">
+                <div style="background:#ffffffcc;width:78%;height:3px;border-radius:2px"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;opacity:0.65">
+                <span>Lina Park</span><span>62%</span>
+              </div>
+              <div style="background:#ffffff22;height:3px;border-radius:2px;margin:6px 0 0">
+                <div style="background:#ffffff99;width:62%;height:3px;border-radius:2px"></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;font-size:12px;opacity:0.8">
+            <span>© HireMatch</span>
+            <span>v1.0 · Internal</span>
+          </div>
         </div>
         """, unsafe_allow_html=True)
 
     with right:
-        st.markdown("""
-        <div style="background:#fff;padding:48px 44px;min-height:540px;
-                    border:1px solid #d8d4c8;border-left:none;border-radius:0 8px 8px 0;">
-        """, unsafe_allow_html=True)
-        st.markdown('<div style="font-size:22px;font-weight:600;color:#2e2e2e;margin-bottom:6px">Sign in</div>', unsafe_allow_html=True)
-        st.markdown('<div style="font-size:13px;color:#7a7a72;margin-bottom:24px">Use your team credentials to continue.</div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div style="min-height:100vh;display:flex;flex-direction:column;justify-content:center;'
+            'padding:48px 32px">',
+            unsafe_allow_html=True
+        )
+        st.markdown('<div class="login-form-wrap">', unsafe_allow_html=True)
 
-        username = st.text_input("Username", placeholder="username", label_visibility="visible")
-        password = st.text_input("Password", placeholder="••••••••", type="password", label_visibility="visible")
+        st.markdown(
+            '<div style="font-size:24px;font-weight:600;color:#2e2e2e;margin-bottom:6px;'
+            'letter-spacing:-0.3px">Welcome back</div>',
+            unsafe_allow_html=True
+        )
+        st.markdown(
+            '<div style="font-size:13px;color:#7a7a72;margin-bottom:28px">'
+            'Sign in to continue to your recruiting workspace.</div>',
+            unsafe_allow_html=True
+        )
 
-        if st.button("Sign in", use_container_width=True):
+        username = st.text_input("Username", placeholder="e.g. hr")
+        password = st.text_input("Password", placeholder="Enter password", type="password")
+
+        opt_l, opt_r = st.columns([1, 1])
+        with opt_l:
+            st.checkbox("Remember username", value=False)
+        with opt_r:
+            st.markdown(
+                '<div style="text-align:right;font-size:12px;color:#7a7a72;padding-top:6px">'
+                '<a href="#" style="color:#7a7a72;text-decoration:none">Need help?</a></div>',
+                unsafe_allow_html=True
+            )
+
+        st.markdown('<div style="height:6px"></div>', unsafe_allow_html=True)
+
+        if st.button("Sign in", use_container_width=True, key="login_btn"):
             user = USERS.get(username)
             if user and user["password"] == password:
                 st.session_state["logged_in"] = True
@@ -201,16 +262,28 @@ if not st.session_state["logged_in"]:
                 st.session_state["display_name"] = user["name"]
                 st.rerun()
             else:
-                st.markdown('<div style="font-size:13px;color:#8a3a3a;background:#DC9B9B22;border:1px solid #DC9B9B66;border-radius:5px;padding:8px 12px;margin-top:10px">Incorrect username or password.</div>', unsafe_allow_html=True)
+                st.markdown(
+                    '<div style="font-size:13px;color:#8a3a3a;background:#DC9B9B1f;'
+                    'border:1px solid #DC9B9B55;border-radius:6px;padding:9px 12px;margin-top:12px">'
+                    'Incorrect username or password.</div>',
+                    unsafe_allow_html=True
+                )
 
-        st.markdown("""
-        <div style="margin-top:24px;font-size:12px;color:#7a7a72;background:#E5EEE4;border:1px solid #cdd8cc;border-radius:6px;padding:10px 12px;line-height:1.7">
-          <b style="color:#2e2e2e">Demo accounts</b><br>
-          admin / admin123 &nbsp; · &nbsp; hr / hr2024 &nbsp; · &nbsp; manager / manager123
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(
+            '<div style="margin-top:32px;padding-top:18px;border-top:1px solid #d8d4c8">'
+            '<div style="font-size:11px;color:#7a7a72;text-transform:uppercase;'
+            'letter-spacing:0.4px;margin-bottom:10px">Demo accounts</div>'
+            '<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;'
+            'color:#2e2e2e;line-height:1.9">'
+            '<div>admin <span style="color:#7a7a72">·</span> admin123</div>'
+            '<div>hr <span style="color:#7a7a72">·</span> hr2024</div>'
+            '<div>manager <span style="color:#7a7a72">·</span> manager123</div>'
+            '</div></div>',
+            unsafe_allow_html=True
+        )
 
-        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     st.stop()
 
