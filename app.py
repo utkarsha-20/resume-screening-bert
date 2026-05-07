@@ -163,61 +163,44 @@ if not st.session_state["logged_in"]:
     left, right = st.columns([5, 6], gap="small")
 
     with left:
-        st.markdown("""
-        <div style="background:#DC9B9B;min-height:100vh;padding:48px 44px;
-                    display:flex;flex-direction:column;justify-content:space-between;color:#fff">
-
-          <div style="display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600">
-            <div style="width:28px;height:28px;background:#fff;color:#DC9B9B;
-                        border-radius:6px;display:inline-flex;align-items:center;justify-content:center;
-                        font-weight:700;font-size:13px">H</div>
-            HireMatch
-          </div>
-
-          <div style="max-width:380px">
-            <div style="font-size:13px;font-weight:500;opacity:0.85;margin-bottom:14px;
-                        text-transform:uppercase;letter-spacing:0.4px">Recruiting workspace</div>
-            <div style="font-size:26px;font-weight:600;line-height:1.35;margin-bottom:18px">
-              Screen and rank candidates the way your team already works.
-            </div>
-            <div style="font-size:14px;line-height:1.6;opacity:0.92;margin-bottom:28px">
-              Upload resumes, paste a job description, and get a ranked shortlist in seconds —
-              with skill-match analysis and an Excel export when you need to share it.
-            </div>
-
-            <div style="background:#ffffff14;border:1px solid #ffffff33;border-radius:8px;padding:14px 16px">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                <div style="font-size:12px;opacity:0.85">Senior Data Scientist · 47 candidates</div>
-                <div style="font-size:11px;background:#ffffff22;border:1px solid #ffffff33;
-                            border-radius:3px;padding:2px 8px">Live</div>
-              </div>
-              <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:500">
-                <span>Priya Nair</span><span>91%</span>
-              </div>
-              <div style="background:#ffffff22;height:3px;border-radius:2px;margin:6px 0">
-                <div style="background:#fff;width:91%;height:3px;border-radius:2px"></div>
-              </div>
-              <div style="display:flex;justify-content:space-between;font-size:13px;opacity:0.85">
-                <span>Arjun Sharma</span><span>78%</span>
-              </div>
-              <div style="background:#ffffff22;height:3px;border-radius:2px;margin:6px 0">
-                <div style="background:#ffffffcc;width:78%;height:3px;border-radius:2px"></div>
-              </div>
-              <div style="display:flex;justify-content:space-between;font-size:13px;opacity:0.65">
-                <span>Lina Park</span><span>62%</span>
-              </div>
-              <div style="background:#ffffff22;height:3px;border-radius:2px;margin:6px 0 0">
-                <div style="background:#ffffff99;width:62%;height:3px;border-radius:2px"></div>
-              </div>
-            </div>
-          </div>
-
-          <div style="display:flex;justify-content:space-between;font-size:12px;opacity:0.8">
-            <span>© HireMatch</span>
-            <span>v1.0 · Internal</span>
-          </div>
-        </div>
-        """, unsafe_allow_html=True)
+        left_html = (
+            '<div style="background:#DC9B9B;min-height:100vh;padding:48px 44px;'
+            'display:flex;flex-direction:column;justify-content:space-between;color:#fff">'
+            '<div style="display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600">'
+            '<div style="width:28px;height:28px;background:#fff;color:#DC9B9B;'
+            'border-radius:6px;display:inline-flex;align-items:center;justify-content:center;'
+            'font-weight:700;font-size:13px">H</div>HireMatch</div>'
+            '<div style="max-width:380px">'
+            '<div style="font-size:13px;font-weight:500;opacity:0.85;margin-bottom:14px;'
+            'text-transform:uppercase;letter-spacing:0.4px">Recruiting workspace</div>'
+            '<div style="font-size:26px;font-weight:600;line-height:1.35;margin-bottom:18px">'
+            'Screen and rank candidates the way your team already works.</div>'
+            '<div style="font-size:14px;line-height:1.6;opacity:0.92;margin-bottom:28px">'
+            'Upload resumes, paste a job description, and get a ranked shortlist in seconds — '
+            'with skill-match analysis and an Excel export when you need to share it.</div>'
+            '<div style="background:#ffffff14;border:1px solid #ffffff33;border-radius:8px;padding:14px 16px">'
+            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+            '<div style="font-size:12px;opacity:0.85">Senior Data Scientist · 47 candidates</div>'
+            '<div style="font-size:11px;background:#ffffff22;border:1px solid #ffffff33;'
+            'border-radius:3px;padding:2px 8px">Live</div></div>'
+            '<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:500">'
+            '<span>Priya Nair</span><span>91%</span></div>'
+            '<div style="background:#ffffff22;height:3px;border-radius:2px;margin:6px 0">'
+            '<div style="background:#fff;width:91%;height:3px;border-radius:2px"></div></div>'
+            '<div style="display:flex;justify-content:space-between;font-size:13px;opacity:0.85">'
+            '<span>Arjun Sharma</span><span>78%</span></div>'
+            '<div style="background:#ffffff22;height:3px;border-radius:2px;margin:6px 0">'
+            '<div style="background:#ffffffcc;width:78%;height:3px;border-radius:2px"></div></div>'
+            '<div style="display:flex;justify-content:space-between;font-size:13px;opacity:0.65">'
+            '<span>Lina Park</span><span>62%</span></div>'
+            '<div style="background:#ffffff22;height:3px;border-radius:2px;margin:6px 0 0">'
+            '<div style="background:#ffffff99;width:62%;height:3px;border-radius:2px"></div></div>'
+            '</div></div>'
+            '<div style="display:flex;justify-content:space-between;font-size:12px;opacity:0.8">'
+            '<span>© HireMatch</span><span>v1.0 · Internal</span></div>'
+            '</div>'
+        )
+        st.markdown(left_html, unsafe_allow_html=True)
 
     with right:
         st.markdown(
