@@ -489,8 +489,8 @@ st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 for jd_name, results in all_results.items():
     filtered = [r for r in results if r["Final Score (%)"] >= min_score]
 
-    top_score = results[0]["Final Score (%)"] if results else 0
-    avg_score = round(sum(r["Final Score (%)"] for r in results) / len(results), 1) if results else 0
+    top_score = round(float(results[0]["Final Score (%)"]), 2) if results else 0
+    avg_score = round(sum(r["Final Score (%)"] for r in results) / len(results), 2) if results else 0
     strong = sum(1 for r in results if r["Final Score (%)"] >= 55)
 
     st.markdown(f'<div class="jd-header">📋 {jd_name}</div>', unsafe_allow_html=True)
@@ -529,9 +529,9 @@ for jd_name, results in all_results.items():
                 unsafe_allow_html=True
             )
         for idx, r in enumerate(filtered):
-            score = round(r["Final Score (%)"], 1)
-            sem   = round(r["Semantic Score (%)"], 1)
-            skl   = round(r["Skill Match Score (%)"], 1)
+            score = round(float(r["Final Score (%)"]), 2)
+            sem   = round(float(r["Semantic Score (%)"]), 2)
+            skl   = round(float(r["Skill Match Score (%)"]), 2)
             exp   = r["Years of Experience"]
             cls   = score_class(score)
             border = "border-left: 3px solid #DC9B9B;" if idx == 0 else ""
