@@ -253,9 +253,10 @@ def run_screening(resumes: dict, jd_text: str):
         resume_skills = extract_skills(text)
         years_exp = extract_experience(text)
         email = extract_email(text)
-        semantic_score = calculate_similarity(jd_text, text)
+        semantic_score = round(calculate_similarity(jd_text, text), 1)
         skill_score, matched = calculate_skill_match(jd_skills, resume_skills)
-        final = round(semantic_score * 0.75 + skill_score * 0.25, 2)
+        skill_score = round(skill_score, 1)
+        final = round(semantic_score * 0.75 + skill_score * 0.25, 1)
         missing = [s for s in jd_skills if s not in matched]
 
         results.append({
@@ -488,7 +489,7 @@ st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 for jd_name, results in all_results.items():
     filtered = [r for r in results if r["Final Score (%)"] >= min_score]
 
-    top_score = round(results[0]["Final Score (%)"], 1) if results else 0
+    top_score = results[0]["Final Score (%)"] if results else 0
     avg_score = round(sum(r["Final Score (%)"] for r in results) / len(results), 1) if results else 0
     strong = sum(1 for r in results if r["Final Score (%)"] >= 55)
 
