@@ -1,6 +1,7 @@
 import io
 import os
 import tempfile
+from datetime import datetime
 
 import pandas as pd
 import streamlit as st
@@ -20,78 +21,14 @@ st.set_page_config(
 # ── Users ─────────────────────────────────────────────────────────────────────
 
 USERS = {
-    "admin":   "admin123",
-    "hr":      "hr2024",
-    "manager": "manager123",
+    "admin":   {"password": "admin123",   "role": "Administrator", "name": "Admin"},
+    "hr":      {"password": "hr2024",     "role": "HR Specialist",  "name": "HR Team"},
+    "manager": {"password": "manager123", "role": "Hiring Manager", "name": "Manager"},
 }
 
-# ── Login ─────────────────────────────────────────────────────────────────────
+# ── Global CSS ────────────────────────────────────────────────────────────────
 
-if "logged_in" not in st.session_state:
-    st.session_state["logged_in"] = False
-
-if not st.session_state["logged_in"]:
-    st.markdown("""
-    <style>
-      .login-wrap {
-        max-width: 380px;
-        margin: 80px auto 0;
-        background: #fff;
-        border: 1px solid #d8d4c8;
-        border-radius: 8px;
-        padding: 36px 32px 32px;
-      }
-      .login-title {
-        font-size: 22px;
-        font-weight: 700;
-        color: #2e2e2e;
-        margin-bottom: 4px;
-      }
-      .login-sub {
-        font-size: 13px;
-        color: #7a7a72;
-        margin-bottom: 24px;
-      }
-      .login-err {
-        font-size: 13px;
-        color: #c0392b;
-        background: #fdf0ee;
-        border: 1px solid #e8b4ae;
-        border-radius: 5px;
-        padding: 8px 12px;
-        margin-top: 12px;
-      }
-    </style>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
-    <div style="
-        background:#DC9B9B;
-        padding: 40px 0 32px;
-        text-align:center;
-        margin: 0 -48px 32px;
-    ">
-        <div style="font-size:28px;font-weight:700;color:#fff;margin-bottom:6px">HireMatch 🎯</div>
-        <div style="font-size:14px;color:#fff;opacity:0.88">Sign in to access the resume screener</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    _, col, _ = st.columns([1, 2, 1])
-    with col:
-        username = st.text_input("Username", placeholder="Enter username")
-        password = st.text_input("Password", placeholder="Enter password", type="password")
-
-        if st.button("Sign in", use_container_width=True):
-            if username in USERS and USERS[username] == password:
-                st.session_state["logged_in"] = True
-                st.session_state["username"] = username
-                st.rerun()
-            else:
-                st.markdown('<div class="login-err">Incorrect username or password.</div>', unsafe_allow_html=True)
-
-    st.stop()
-
-st.markdown("""
+BASE_CSS = """
 <style>
   html, body,
   [data-testid="stAppViewContainer"],
@@ -100,8 +37,8 @@ st.markdown("""
   .stApp, .main {
     background: #F6F4E8 !important;
     color: #2e2e2e !important;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-    font-size: 15px;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+    font-size: 14px;
   }
 
   [data-testid="stSidebar"],
@@ -109,66 +46,16 @@ st.markdown("""
   #MainMenu, footer, header { visibility: hidden; }
 
   .block-container {
-    max-width: 1200px;
-    padding: 0 48px 56px;
+    max-width: 1240px;
+    padding: 0 32px 64px;
     margin: 0 auto;
   }
 
-  .hero {
-    background: #DC9B9B;
-    color: #fff;
-    padding: 40px 48px 36px;
-    margin: 0 -48px 36px;
-  }
-  .hero-title {
-    font-size: 32px;
-    font-weight: 700;
-    color: #fff;
-    margin-bottom: 8px;
-    letter-spacing: -0.5px;
-  }
-  .hero-sub {
-    font-size: 16px;
-    color: #fff;
-    opacity: 0.88;
-    margin-bottom: 20px;
-    max-width: 680px;
-    line-height: 1.5;
-  }
-  .hero-pills { display: flex; gap: 10px; flex-wrap: wrap; }
-  .hero-pill {
-    font-size: 12px;
-    color: #fff;
-    border: 1px solid #ffffff55;
-    border-radius: 4px;
-    padding: 3px 10px;
-  }
-
-  .how-row {
-    display: flex;
-    gap: 0;
-    margin-bottom: 32px;
-    border: 1px solid #d8d4c8;
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  .how-step {
-    flex: 1;
-    padding: 16px 18px;
-    background: #fff;
-    border-right: 1px solid #d8d4c8;
-  }
-  .how-step:last-child { border-right: none; }
-  .how-num { font-size: 11px; font-weight: 700; color: #DC9B9B; margin-bottom: 4px; }
-  .how-text { font-size: 13px; color: #2e2e2e; font-weight: 500; }
-  .how-desc { font-size: 12px; color: #7a7a72; margin-top: 2px; }
-
-  .section-label { font-size: 13px; font-weight: 600; color: #3a3a32; margin-bottom: 10px; }
-
+  /* inputs */
   [data-testid="stTextArea"] textarea,
   [data-testid="stTextInput"] input {
-    background: #F6F4E8 !important;
-    border: 1px solid #ccc9bc !important;
+    background: #fff !important;
+    border: 1px solid #d8d4c8 !important;
     border-radius: 6px !important;
     color: #2e2e2e !important;
     font-size: 14px !important;
@@ -176,144 +63,353 @@ st.markdown("""
   [data-testid="stTextArea"] textarea:focus,
   [data-testid="stTextInput"] input:focus {
     border-color: #DC9B9B !important;
-    box-shadow: 0 0 0 3px #DC9B9B1a !important;
+    box-shadow: 0 0 0 2px #DC9B9B22 !important;
   }
   [data-testid="stFileUploader"] {
-    background: #F6F4E8;
-    border: 1px dashed #ccc9bc;
+    background: #fff;
+    border: 1px dashed #d0ccbf;
     border-radius: 6px;
   }
-  [data-testid="stRadio"] label { font-size: 14px; color: #2e2e2e; }
+  [data-testid="stRadio"] label { font-size: 13px; color: #2e2e2e; }
 
   .stButton > button {
     background: #DC9B9B;
     color: #fff;
     border: 1px solid #c98888;
     border-radius: 6px;
-    font-size: 15px;
-    font-weight: 600;
-    padding: 10px 32px;
-    transition: background 150ms ease;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 20px;
+    transition: background 120ms ease;
   }
   .stButton > button:hover { background: #c98888; border-color: #b87777; }
 
   .stDownloadButton > button {
-    background: #E5EEE4;
+    background: #fff;
     color: #2e2e2e;
-    border: 1px solid #cdd8cc;
+    border: 1px solid #d8d4c8;
     border-radius: 6px;
     font-size: 13px;
     font-weight: 500;
-    padding: 7px 18px;
+    padding: 7px 16px;
   }
+  .stDownloadButton > button:hover { background: #E5EEE4; border-color: #cdd8cc; }
 
-  .divider { height: 1px; background: #d8d4c8; margin: 28px 0; }
-
-  /* ── JD section header ── */
-  .jd-header {
-    font-size: 15px;
-    font-weight: 700;
-    color: #2e2e2e;
-    padding: 14px 0 10px;
-    border-bottom: 1px solid #d8d4c8;
-    margin-bottom: 16px;
-  }
-
-  .stat-row { display: flex; gap: 10px; margin-bottom: 24px; }
-  .stat-box {
-    flex: 1;
-    background: #fff;
-    border: 1px solid #d8d4c8;
-    border-radius: 6px;
-    padding: 16px 18px;
-  }
-  .stat-box.rose { border-left: 3px solid #DC9B9B; }
-  .stat-box.mint { border-left: 3px solid #C0E1D2; }
-  .stat-box .icon { font-size: 18px; margin-bottom: 6px; }
-  .stat-box .val { font-size: 28px; font-weight: 700; color: #2e2e2e; line-height: 1; }
-  .stat-box .lbl { font-size: 13px; color: #7a7a72; margin-top: 4px; }
-
-  .result-card {
-    background: #fff;
-    border: 1px solid #d8d4c8;
-    border-radius: 6px;
-    padding: 18px 20px;
-    margin-bottom: 10px;
-  }
-  .result-card.top-card { border-left: 3px solid #DC9B9B; }
-
-  .card-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 8px;
-  }
-  .resume-name { font-size: 16px; font-weight: 600; color: #2e2e2e; }
-  .top-label { font-size: 11px; font-weight: 600; color: #DC9B9B; margin-left: 8px; }
-  .email-link { font-size: 12px; color: #7a7a72; margin-left: 10px; }
-
-  .score-badge {
-    font-size: 14px; font-weight: 700;
-    color: #5a3a3a; background: #DC9B9B1a;
-    border: 1px solid #DC9B9B88;
-    border-radius: 4px; padding: 3px 12px;
-  }
-  .score-badge.mid { color: #3a5a4a; background: #C0E1D21a; border-color: #C0E1D2; }
-  .score-badge.low { color: #7a7a72; background: #E5EEE4; border-color: #cdd8cc; }
-
-  .meta-row { display: flex; gap: 24px; margin-bottom: 10px; font-size: 13px; color: #7a7a72; }
-  .meta-row span b { color: #2e2e2e; font-weight: 600; }
-  .meta-item { font-size: 13px; color: #7a7a72; margin-bottom: 8px; }
-  .meta-item b { color: #2e2e2e; font-weight: 600; }
-
-  .bar-track { background: #ede9df; border-radius: 3px; height: 5px; width: 100%; margin-bottom: 14px; }
-  .bar-fill     { height: 5px; border-radius: 3px; background: #DC9B9B; }
-  .bar-fill.mid { background: #C0E1D2; }
-  .bar-fill.low { background: #d8d4c8; }
-
-  .skills-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
-  .skill-tag {
-    font-size: 12px; color: #3a6b5a;
-    background: #C0E1D230; border: 1px solid #C0E1D2;
-    border-radius: 4px; padding: 2px 9px;
-  }
-  .skill-tag.miss { color: #7a7a72; background: transparent; border-color: #d0d0c8; }
-  .skills-section-label { font-size: 12px; color: #7a7a72; margin: 10px 0 4px; }
-
-  .empty-state { text-align: center; padding: 48px 24px; color: #7a7a72; font-size: 15px; }
-  .empty-state .big { font-size: 36px; margin-bottom: 12px; }
-  .empty-state b { color: #2e2e2e; }
-
-  [data-testid="stTabs"] [role="tablist"] { border-bottom: 1px solid #d8d4c8; }
+  [data-testid="stTabs"] [role="tablist"] { border-bottom: 1px solid #d8d4c8; gap: 4px; }
   [data-testid="stTabs"] button {
-    font-size: 15px; color: #7a7a72; background: transparent;
+    font-size: 14px; color: #7a7a72; background: transparent;
     border: none; border-bottom: 2px solid transparent;
-    padding: 8px 16px; margin-bottom: -1px;
+    padding: 8px 14px; margin-bottom: -1px;
   }
   [data-testid="stTabs"] button[aria-selected="true"] {
     color: #2e2e2e; border-bottom-color: #DC9B9B; font-weight: 600;
   }
 
   [data-testid="stDataFrame"] { border: 1px solid #d8d4c8; border-radius: 6px; overflow: hidden; }
+  [data-testid="stSlider"] { padding: 0; }
+</style>
+"""
 
-  .app-footer {
-    margin-top: 48px; padding-top: 20px;
+# ── Login ─────────────────────────────────────────────────────────────────────
+
+if "logged_in" not in st.session_state:
+    st.session_state["logged_in"] = False
+
+if not st.session_state["logged_in"]:
+    st.markdown(BASE_CSS, unsafe_allow_html=True)
+    st.markdown("""
+    <style>
+      .login-shell {
+        display: flex;
+        min-height: calc(100vh - 80px);
+        margin: 0 -32px;
+      }
+      .login-left {
+        flex: 1;
+        background: #DC9B9B;
+        color: #fff;
+        padding: 60px 56px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .brand-row { font-size: 16px; font-weight: 700; letter-spacing: -0.2px; }
+      .brand-row span { opacity: 0.8; font-weight: 500; margin-left: 8px; font-size: 13px; }
+      .left-headline { font-size: 28px; font-weight: 600; line-height: 1.3; max-width: 380px; }
+      .left-foot { font-size: 12px; opacity: 0.85; }
+
+      .login-right {
+        flex: 1;
+        background: #F6F4E8;
+        padding: 60px 64px;
+        display: flex;
+        align-items: center;
+      }
+      .login-card { max-width: 360px; width: 100%; }
+      .login-h1 { font-size: 22px; font-weight: 600; color: #2e2e2e; margin-bottom: 6px; }
+      .login-p  { font-size: 13px; color: #7a7a72; margin-bottom: 28px; }
+      .login-creds {
+        margin-top: 20px;
+        font-size: 12px;
+        color: #7a7a72;
+        background: #E5EEE4;
+        border: 1px solid #cdd8cc;
+        border-radius: 6px;
+        padding: 10px 12px;
+        line-height: 1.6;
+      }
+      .login-creds b { color: #2e2e2e; }
+      .login-err {
+        font-size: 13px; color: #8a3a3a;
+        background: #DC9B9B22; border: 1px solid #DC9B9B66;
+        border-radius: 5px; padding: 8px 12px; margin-top: 10px;
+      }
+    </style>
+    """, unsafe_allow_html=True)
+
+    left, right = st.columns([1, 1], gap="small")
+    with left:
+        st.markdown("""
+        <div style="background:#DC9B9B;color:#fff;padding:60px 48px;min-height:540px;
+                    display:flex;flex-direction:column;justify-content:space-between;
+                    border-radius:8px 0 0 8px;">
+          <div style="font-size:16px;font-weight:700">HireMatch <span style="opacity:0.8;font-weight:500;font-size:13px;margin-left:6px">Recruiting workspace</span></div>
+          <div style="font-size:26px;font-weight:600;line-height:1.35;max-width:360px">
+            Screen and rank candidates against any job description in seconds.
+          </div>
+          <div style="font-size:12px;opacity:0.85">© HireMatch · Internal use only</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with right:
+        st.markdown("""
+        <div style="background:#fff;padding:48px 44px;min-height:540px;
+                    border:1px solid #d8d4c8;border-left:none;border-radius:0 8px 8px 0;">
+        """, unsafe_allow_html=True)
+        st.markdown('<div style="font-size:22px;font-weight:600;color:#2e2e2e;margin-bottom:6px">Sign in</div>', unsafe_allow_html=True)
+        st.markdown('<div style="font-size:13px;color:#7a7a72;margin-bottom:24px">Use your team credentials to continue.</div>', unsafe_allow_html=True)
+
+        username = st.text_input("Username", placeholder="username", label_visibility="visible")
+        password = st.text_input("Password", placeholder="••••••••", type="password", label_visibility="visible")
+
+        if st.button("Sign in", use_container_width=True):
+            user = USERS.get(username)
+            if user and user["password"] == password:
+                st.session_state["logged_in"] = True
+                st.session_state["username"] = username
+                st.session_state["role"] = user["role"]
+                st.session_state["display_name"] = user["name"]
+                st.rerun()
+            else:
+                st.markdown('<div style="font-size:13px;color:#8a3a3a;background:#DC9B9B22;border:1px solid #DC9B9B66;border-radius:5px;padding:8px 12px;margin-top:10px">Incorrect username or password.</div>', unsafe_allow_html=True)
+
+        st.markdown("""
+        <div style="margin-top:24px;font-size:12px;color:#7a7a72;background:#E5EEE4;border:1px solid #cdd8cc;border-radius:6px;padding:10px 12px;line-height:1.7">
+          <b style="color:#2e2e2e">Demo accounts</b><br>
+          admin / admin123 &nbsp; · &nbsp; hr / hr2024 &nbsp; · &nbsp; manager / manager123
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    st.stop()
+
+# ── Authed app ────────────────────────────────────────────────────────────────
+
+st.markdown(BASE_CSS, unsafe_allow_html=True)
+
+st.markdown("""
+<style>
+  .topbar {
+    background: #fff;
+    border-bottom: 1px solid #d8d4c8;
+    padding: 14px 32px;
+    margin: 0 -32px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand { font-size: 16px; font-weight: 700; color: #2e2e2e; letter-spacing: -0.2px; }
+  .brand span { color: #DC9B9B; }
+  .nav-links { display: flex; gap: 22px; font-size: 13px; }
+  .nav-links a {
+    color: #7a7a72; text-decoration: none; padding: 6px 0;
+    border-bottom: 2px solid transparent;
+  }
+  .nav-links a.active { color: #2e2e2e; border-bottom-color: #DC9B9B; font-weight: 500; }
+  .user-pill {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: #2e2e2e;
+  }
+  .user-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: #DC9B9B; color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600;
+  }
+  .user-meta { line-height: 1.2; }
+  .user-name { font-weight: 600; color: #2e2e2e; }
+  .user-role { font-size: 11px; color: #7a7a72; }
+
+  .page-head {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 20px;
+  }
+  .page-title { font-size: 22px; font-weight: 600; color: #2e2e2e; }
+  .page-sub { font-size: 13px; color: #7a7a72; margin-top: 2px; }
+  .page-meta { font-size: 12px; color: #7a7a72; }
+
+  .panel {
+    background: #fff;
+    border: 1px solid #d8d4c8;
+    border-radius: 8px;
+    padding: 20px 22px;
+  }
+  .panel-h {
+    font-size: 13px; font-weight: 600; color: #2e2e2e;
+    margin-bottom: 4px;
+  }
+  .panel-sub { font-size: 12px; color: #7a7a72; margin-bottom: 14px; }
+
+  .kpi-row { display: flex; gap: 12px; margin-bottom: 20px; }
+  .kpi {
+    flex: 1; background: #fff;
+    border: 1px solid #d8d4c8; border-radius: 8px;
+    padding: 16px 18px;
+  }
+  .kpi-l { font-size: 12px; color: #7a7a72; margin-bottom: 6px; }
+  .kpi-v { font-size: 22px; font-weight: 600; color: #2e2e2e; line-height: 1; }
+
+  .jd-block-h {
+    font-size: 14px; font-weight: 600; color: #2e2e2e;
+    padding: 14px 0 10px;
+    border-bottom: 1px solid #d8d4c8;
+    margin-bottom: 14px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .jd-block-h .badge {
+    font-size: 11px; font-weight: 500;
+    background: #E5EEE4; color: #3a6b5a;
+    border: 1px solid #cdd8cc;
+    border-radius: 10px; padding: 2px 9px;
+  }
+
+  .row-card {
+    background: #fff;
+    border: 1px solid #d8d4c8;
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin-bottom: 8px;
+  }
+  .row-card.top { border-left: 3px solid #DC9B9B; }
+  .name { font-size: 14px; font-weight: 600; color: #2e2e2e; }
+  .rank { font-size: 12px; color: #7a7a72; margin-right: 8px; font-weight: 500; }
+  .email-l { font-size: 12px; color: #7a7a72; }
+  .meta-l  { font-size: 12px; color: #7a7a72; }
+  .meta-l b { color: #2e2e2e; font-weight: 600; }
+
+  .sbar { background: #ede9df; border-radius: 2px; height: 4px; width: 100%; margin: 8px 0 10px; }
+
+  .tag {
+    font-size: 11px; color: #3a6b5a;
+    background: #E5EEE4; border: 1px solid #cdd8cc;
+    border-radius: 3px; padding: 2px 8px;
+    display: inline-block; margin: 2px 3px 2px 0;
+  }
+  .tag.gap { color: #7a7a72; background: transparent; border-color: #d8d4c8; border-style: dashed; }
+
+  .empty {
+    background: #fff;
+    border: 1px dashed #d0ccbf;
+    border-radius: 8px;
+    padding: 40px 24px;
+    text-align: center;
+    color: #7a7a72;
+    font-size: 14px;
+  }
+  .empty b { color: #2e2e2e; }
+
+  .footer-bar {
+    margin-top: 56px; padding-top: 18px;
     border-top: 1px solid #d8d4c8;
     font-size: 12px; color: #7a7a72;
     display: flex; justify-content: space-between;
   }
-
-  /* slider */
-  [data-testid="stSlider"] { padding: 0; }
 </style>
 """, unsafe_allow_html=True)
 
+uname    = st.session_state.get("username", "")
+display  = st.session_state.get("display_name", uname.title())
+role     = st.session_state.get("role", "User")
+initials = (display[:2] if display else uname[:2]).upper()
+
+# ── Top bar ───────────────────────────────────────────────────────────────────
+
+bar_l, bar_c, bar_r = st.columns([2, 4, 2])
+with bar_l:
+    st.markdown(
+        '<div style="font-size:18px;font-weight:700;color:#2e2e2e;padding-top:8px">'
+        'Hire<span style="color:#DC9B9B">Match</span>'
+        '</div>',
+        unsafe_allow_html=True
+    )
+with bar_c:
+    st.markdown(
+        '<div style="display:flex;gap:24px;font-size:13px;padding-top:10px;justify-content:center">'
+        '<span style="color:#2e2e2e;font-weight:500;border-bottom:2px solid #DC9B9B;padding-bottom:6px">Screening</span>'
+        '<span style="color:#7a7a72">Candidates</span>'
+        '<span style="color:#7a7a72">Roles</span>'
+        '<span style="color:#7a7a72">Reports</span>'
+        '</div>',
+        unsafe_allow_html=True
+    )
+with bar_r:
+    user_col, btn_col = st.columns([3, 2])
+    with user_col:
+        st.markdown(
+            f'<div style="display:flex;align-items:center;gap:10px;justify-content:flex-end;padding-top:4px">'
+            f'<div style="text-align:right;line-height:1.2">'
+            f'<div style="font-size:13px;font-weight:600;color:#2e2e2e">{display}</div>'
+            f'<div style="font-size:11px;color:#7a7a72">{role}</div>'
+            f'</div>'
+            f'<div style="width:32px;height:32px;border-radius:50%;background:#DC9B9B;color:#fff;'
+            f'display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:600">'
+            f'{initials}</div>'
+            f'</div>',
+            unsafe_allow_html=True
+        )
+    with btn_col:
+        if st.button("Sign out", key="logout"):
+            st.session_state.clear()
+            st.rerun()
+
+st.markdown('<div style="height:1px;background:#d8d4c8;margin:8px -32px 24px"></div>', unsafe_allow_html=True)
+
+# ── Page header ───────────────────────────────────────────────────────────────
+
+today = datetime.now().strftime("%a, %b %d %Y")
+head_l, head_r = st.columns([3, 1])
+with head_l:
+    st.markdown(
+        f'<div style="font-size:22px;font-weight:600;color:#2e2e2e">Resume screening</div>'
+        f'<div style="font-size:13px;color:#7a7a72;margin-top:2px">'
+        f'Match candidates against one or more job descriptions.</div>',
+        unsafe_allow_html=True
+    )
+with head_r:
+    st.markdown(
+        f'<div style="text-align:right;font-size:12px;color:#7a7a72;padding-top:6px">{today}</div>',
+        unsafe_allow_html=True
+    )
+
+st.markdown('<div style="height:18px"></div>', unsafe_allow_html=True)
+
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
 
 def score_class(score):
-    if score >= 55:
-        return ""
-    if score >= 35:
-        return "mid"
+    if score >= 55: return ""
+    if score >= 35: return "mid"
     return "low"
 
 
@@ -327,10 +423,10 @@ def run_screening(resumes: dict, jd_text: str):
         resume_skills = extract_skills(text)
         years_exp = extract_experience(text)
         email = extract_email(text)
-        semantic_score = round(calculate_similarity(jd_text, text), 1)
+        semantic_score = round(calculate_similarity(jd_text, text), 2)
         skill_score, matched = calculate_skill_match(jd_skills, resume_skills)
-        skill_score = round(skill_score, 1)
-        final = round(semantic_score * 0.75 + skill_score * 0.25, 1)
+        skill_score = round(skill_score, 2)
+        final = round(semantic_score * 0.75 + skill_score * 0.25, 2)
         missing = [s for s in jd_skills if s not in matched]
 
         results.append({
@@ -354,7 +450,7 @@ def to_excel(all_results: dict) -> bytes:
     buf = io.BytesIO()
     with pd.ExcelWriter(buf, engine="openpyxl") as writer:
         for jd_name, results in all_results.items():
-            sheet_name = jd_name[:31]  # Excel sheet name limit
+            sheet_name = jd_name[:31]
             df = pd.DataFrame([{
                 "Rank": f"#{i + 1}",
                 "Resume": r["Resume"],
@@ -370,71 +466,14 @@ def to_excel(all_results: dict) -> bytes:
     return buf.getvalue()
 
 
-# ── Hero ─────────────────────────────────────────────────────────────────────
-
-st.markdown(f"""
-<div class="hero">
-  <div style="display:flex;justify-content:space-between;align-items:flex-start">
-    <div>
-      <div class="hero-title">HireMatch 🎯</div>
-      <div class="hero-sub">
-        Screen resumes in seconds. Rank candidates by semantic fit and skill coverage — not just keyword count.
-      </div>
-      <div class="hero-pills">
-        <span class="hero-pill">🧠 BERT-powered matching</span>
-        <span class="hero-pill">📄 PDF · DOCX · TXT</span>
-        <span class="hero-pill">🛠 Skill gap analysis</span>
-        <span class="hero-pill">📧 Email extraction</span>
-        <span class="hero-pill">📊 Export to Excel</span>
-      </div>
-    </div>
-    <div style="font-size:13px;color:#fff;opacity:0.85;white-space:nowrap;padding-top:4px">
-      👤 {st.session_state.get("username","")}
-    </div>
-  </div>
-</div>
-""", unsafe_allow_html=True)
-
-if st.button("Sign out", key="logout"):
-    st.session_state.clear()
-    st.rerun()
-
-# ── How it works ─────────────────────────────────────────────────────────────
-
-st.markdown("""
-<div class="how-row">
-  <div class="how-step">
-    <div class="how-num">STEP 1</div>
-    <div class="how-text">📋 Upload job descriptions</div>
-    <div class="how-desc">One or multiple JDs at once</div>
-  </div>
-  <div class="how-step">
-    <div class="how-num">STEP 2</div>
-    <div class="how-text">📂 Upload resumes</div>
-    <div class="how-desc">Bulk upload PDF, DOCX, or TXT</div>
-  </div>
-  <div class="how-step">
-    <div class="how-num">STEP 3</div>
-    <div class="how-text">⚡ Run screening</div>
-    <div class="how-desc">BERT scores every resume instantly</div>
-  </div>
-  <div class="how-step">
-    <div class="how-num">STEP 4</div>
-    <div class="how-text">✅ Filter & export</div>
-    <div class="how-desc">Set score threshold, download Excel</div>
-  </div>
-</div>
-""", unsafe_allow_html=True)
-
 # ── Inputs ────────────────────────────────────────────────────────────────────
 
 col_jd, col_resumes = st.columns([1, 1], gap="large")
 
 with col_jd:
-    st.markdown(
-        '<div class="section-label">📋 Job Description <span style="font-weight:400;color:#7a7a72;font-size:12px">— the role you are hiring for</span></div>',
-        unsafe_allow_html=True
-    )
+    st.markdown('<div style="font-size:13px;font-weight:600;color:#2e2e2e;margin-bottom:4px">Job description</div>', unsafe_allow_html=True)
+    st.markdown('<div style="font-size:12px;color:#7a7a72;margin-bottom:10px">The role you are hiring for.</div>', unsafe_allow_html=True)
+
     jd_input_mode = st.radio(
         "JD mode", ["Paste text", "Upload .txt file"],
         horizontal=True, label_visibility="collapsed"
@@ -443,29 +482,18 @@ with col_jd:
     jd_texts = {}
 
     if jd_input_mode == "Paste text":
-        jd_role = st.text_input(
-            "Role name", placeholder="Role name, e.g. Data Scientist",
-            label_visibility="collapsed"
-        )
-        jd_text_input = st.text_area(
-            "Paste JD",
-            height=148,
-            placeholder="Paste the job description text here — skills, requirements, responsibilities…",
-            label_visibility="collapsed"
-        )
+        jd_role = st.text_input("Role name", placeholder="Role name, e.g. Data Scientist", label_visibility="collapsed")
+        jd_text_input = st.text_area("Paste JD", height=160,
+            placeholder="Paste the job description here — responsibilities, required skills, qualifications…",
+            label_visibility="collapsed")
         if jd_role.strip() and jd_text_input.strip():
             jd_texts[jd_role.strip()] = jd_text_input.strip()
         elif jd_text_input.strip():
             jd_texts["Job Description"] = jd_text_input.strip()
     else:
-        st.markdown(
-            '<div style="font-size:12px;color:#7a7a72;margin-bottom:6px">Upload .txt job description files — one file per role</div>',
-            unsafe_allow_html=True
-        )
-        jd_files = st.file_uploader(
-            "Upload JDs", type=["txt"],
-            accept_multiple_files=True, label_visibility="collapsed"
-        )
+        jd_files = st.file_uploader("Upload JDs", type=["txt"],
+            accept_multiple_files=True, label_visibility="collapsed",
+            help="Upload one .txt file per role.")
         for jf in (jd_files or []):
             with tempfile.NamedTemporaryFile(delete=False, suffix=".txt") as f:
                 f.write(jf.read())
@@ -474,43 +502,30 @@ with col_jd:
             if text.strip():
                 jd_texts[jf.name] = text
         if jd_files:
-            st.markdown(
-                f'<div style="font-size:13px;color:#7a7a72;margin-top:6px">✓ {len(jd_texts)} JD{"s" if len(jd_texts) != 1 else ""} loaded</div>',
-                unsafe_allow_html=True
-            )
+            st.markdown(f'<div style="font-size:12px;color:#7a7a72;margin-top:6px">{len(jd_texts)} JD{"s" if len(jd_texts) != 1 else ""} loaded</div>', unsafe_allow_html=True)
 
 with col_resumes:
-    st.markdown(
-        '<div class="section-label">📂 Candidate Resumes <span style="font-weight:400;color:#7a7a72;font-size:12px">— PDF, DOCX, or TXT</span></div>',
-        unsafe_allow_html=True
-    )
-    st.markdown(
-        '<div style="font-size:12px;color:#7a7a72;margin-bottom:6px">Upload one or more candidate resume files</div>',
-        unsafe_allow_html=True
-    )
-    resume_files = st.file_uploader(
-        "Upload resumes",
-        type=["pdf", "docx", "txt"],
-        accept_multiple_files=True,
-        label_visibility="collapsed"
-    )
+    st.markdown('<div style="font-size:13px;font-weight:600;color:#2e2e2e;margin-bottom:4px">Candidate resumes</div>', unsafe_allow_html=True)
+    st.markdown('<div style="font-size:12px;color:#7a7a72;margin-bottom:10px">Upload PDF, DOCX or TXT files. Bulk supported.</div>', unsafe_allow_html=True)
+
+    resume_files = st.file_uploader("Upload resumes", type=["pdf", "docx", "txt"],
+        accept_multiple_files=True, label_visibility="collapsed")
     if resume_files:
-        st.markdown(
-            f'<div style="font-size:13px;color:#7a7a72;margin-top:6px">✓ {len(resume_files)} resume{"s" if len(resume_files) > 1 else ""} selected</div>',
-            unsafe_allow_html=True
-        )
+        st.markdown(f'<div style="font-size:12px;color:#7a7a72;margin-top:6px">{len(resume_files)} resume{"s" if len(resume_files) > 1 else ""} selected</div>', unsafe_allow_html=True)
 
-st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-run_clicked = st.button("⚡ Run Screening", key="run")
-st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+st.markdown('<div style="height:14px"></div>', unsafe_allow_html=True)
+btn_l, btn_r = st.columns([1, 6])
+with btn_l:
+    run_clicked = st.button("Run screening", key="run")
 
-# ── Guard ────────────────────────────────────────────────────────────────────
+st.markdown('<div style="height:24px"></div>', unsafe_allow_html=True)
+
+# ── Run ──────────────────────────────────────────────────────────────────────
 
 if run_clicked:
     if not jd_texts:
         st.error("Please provide at least one job description.")
         st.stop()
-
     if not resume_files:
         st.error("Please upload at least one resume.")
         st.stop()
@@ -536,38 +551,34 @@ if run_clicked:
     st.session_state["all_results"] = all_results
 
 if "all_results" not in st.session_state:
-    st.markdown("""
-    <div class="empty-state">
-      <div class="big">📄</div>
-      Add job descriptions and upload candidate resumes above, then hit <b>Run Screening</b>.
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        '<div style="background:#fff;border:1px dashed #d0ccbf;border-radius:8px;'
+        'padding:48px 24px;text-align:center;color:#7a7a72;font-size:14px">'
+        'Add a job description and upload resumes above, then run the screening.'
+        '</div>',
+        unsafe_allow_html=True
+    )
     st.stop()
 
 all_results = st.session_state["all_results"]
 
-# ── Score filter ──────────────────────────────────────────────────────────────
+# ── Toolbar above results ────────────────────────────────────────────────────
 
-col_filter, col_export = st.columns([3, 1], gap="large")
-
-with col_filter:
-    st.markdown('<div class="section-label">Filter by minimum score</div>', unsafe_allow_html=True)
-    min_score = st.slider(
-        "Minimum score", 0, 100, 0, 5,
-        format="%d%%", label_visibility="collapsed"
-    )
-
-with col_export:
-    st.markdown('<div class="section-label">Export all results</div>', unsafe_allow_html=True)
+t_l, t_r = st.columns([3, 1], gap="large")
+with t_l:
+    st.markdown('<div style="font-size:13px;font-weight:600;color:#2e2e2e;margin-bottom:4px">Minimum score</div>', unsafe_allow_html=True)
+    min_score = st.slider("Minimum score", 0, 100, 0, 5, format="%d%%", label_visibility="collapsed")
+with t_r:
+    st.markdown('<div style="font-size:13px;font-weight:600;color:#2e2e2e;margin-bottom:4px">Export</div>', unsafe_allow_html=True)
     excel_bytes = to_excel(all_results)
     st.download_button(
-        "⬇ Download Excel",
+        "Download Excel report",
         excel_bytes,
         "hirematch_results.xlsx",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
-st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+st.markdown('<div style="height:1px;background:#d8d4c8;margin:24px 0"></div>', unsafe_allow_html=True)
 
 # ── Results per JD ────────────────────────────────────────────────────────────
 
@@ -578,39 +589,41 @@ for jd_name, results in all_results.items():
     avg_score = round(sum(r["Final Score (%)"] for r in results) / len(results), 2) if results else 0
     strong = sum(1 for r in results if r["Final Score (%)"] >= 55)
 
-    st.markdown(f'<div class="jd-header">📋 {jd_name}</div>', unsafe_allow_html=True)
+    st.markdown(
+        f'<div style="font-size:14px;font-weight:600;color:#2e2e2e;'
+        f'padding:14px 0 10px;border-bottom:1px solid #d8d4c8;margin-bottom:14px;'
+        f'display:flex;align-items:center;justify-content:space-between">'
+        f'<span>{jd_name}</span>'
+        f'<span style="font-size:11px;font-weight:500;background:#E5EEE4;color:#3a6b5a;'
+        f'border:1px solid #cdd8cc;border-radius:10px;padding:2px 9px">'
+        f'{len(filtered)} of {len(results)} shown</span>'
+        f'</div>',
+        unsafe_allow_html=True
+    )
 
-    st.markdown(f"""
-    <div class="stat-row">
-      <div class="stat-box">
-        <div class="icon">📄</div>
-        <div class="val">{len(results)}</div>
-        <div class="lbl">Screened</div>
-      </div>
-      <div class="stat-box rose">
-        <div class="icon">🏆</div>
-        <div class="val">{top_score}%</div>
-        <div class="lbl">Top score</div>
-      </div>
-      <div class="stat-box">
-        <div class="icon">📊</div>
-        <div class="val">{avg_score}%</div>
-        <div class="lbl">Average</div>
-      </div>
-      <div class="stat-box mint">
-        <div class="icon">✅</div>
-        <div class="val">{strong}</div>
-        <div class="lbl">Strong matches ≥55%</div>
-      </div>
-    </div>
-    """, unsafe_allow_html=True)
+    k1, k2, k3, k4 = st.columns(4)
+    for col, label, val in [
+        (k1, "Screened", f"{len(results)}"),
+        (k2, "Top score", f"{top_score}%"),
+        (k3, "Average", f"{avg_score}%"),
+        (k4, "Strong matches", f"{strong}"),
+    ]:
+        col.markdown(
+            f'<div style="background:#fff;border:1px solid #d8d4c8;border-radius:8px;padding:14px 16px">'
+            f'<div style="font-size:12px;color:#7a7a72;margin-bottom:6px">{label}</div>'
+            f'<div style="font-size:22px;font-weight:600;color:#2e2e2e;line-height:1">{val}</div>'
+            f'</div>',
+            unsafe_allow_html=True
+        )
 
-    tab_cards, tab_table = st.tabs(["📋 Ranked Results", "📊 Table View"])
+    st.markdown('<div style="height:18px"></div>', unsafe_allow_html=True)
+
+    tab_cards, tab_table = st.tabs(["Ranked candidates", "Table view"])
 
     with tab_cards:
         if not filtered:
             st.markdown(
-                f'<p style="color:#7a7a72;font-size:13px">No candidates scored above {min_score}%. Lower the filter threshold.</p>',
+                f'<p style="color:#7a7a72;font-size:13px">No candidates above {min_score}%. Lower the threshold.</p>',
                 unsafe_allow_html=True
             )
         for idx, r in enumerate(filtered):
@@ -619,80 +632,72 @@ for jd_name, results in all_results.items():
             skl   = round(float(r["Skill Match Score (%)"]), 2)
             exp   = r["Years of Experience"]
             cls   = score_class(score)
-            border = "border-left: 3px solid #DC9B9B;" if idx == 0 else ""
 
-            badge_color = {
-                "":    ("#5a3a3a", "#DC9B9B1a", "#DC9B9B88"),
-                "mid": ("#3a5a4a", "#C0E1D21a", "#C0E1D2"),
-                "low": ("#7a7a72", "#E5EEE4",   "#cdd8cc"),
+            badge = {
+                "":    ("#5a3a3a", "#DC9B9B22", "#DC9B9B66"),
+                "mid": ("#3a5a4a", "#E5EEE4",  "#cdd8cc"),
+                "low": ("#7a7a72", "#F6F4E8",  "#d8d4c8"),
             }[cls]
             bar_color = {"": "#DC9B9B", "mid": "#C0E1D2", "low": "#d8d4c8"}[cls]
+            border = "border-left: 3px solid #DC9B9B;" if idx == 0 else ""
 
-            # ── card open
             st.markdown(
-                f'<div class="result-card" style="{border}">',
+                f'<div style="background:#fff;border:1px solid #d8d4c8;{border}'
+                f'border-radius:6px;padding:14px 18px;margin-bottom:8px">',
                 unsafe_allow_html=True
             )
 
-            # ── header row: name + score
             c_name, c_score = st.columns([5, 1])
             with c_name:
-                rank_str = f"#{idx + 1} — {r['Resume']}"
-                best     = "  ⭐ Best match" if idx == 0 else ""
-                email    = f"  ·  📧 {r['Email']}" if r["Email"] else ""
                 st.markdown(
-                    f'<div class="resume-name">{rank_str}'
-                    f'<span class="top-label">{best}</span>'
-                    f'<span class="email-link">{email}</span></div>',
+                    f'<div style="font-size:14px;font-weight:600;color:#2e2e2e">'
+                    f'<span style="color:#7a7a72;font-weight:500;margin-right:8px">#{idx + 1}</span>'
+                    f'{r["Resume"]}'
+                    f'{"  ·  " + r["Email"] if r["Email"] else ""}'
+                    f'</div>',
                     unsafe_allow_html=True
                 )
             with c_score:
                 st.markdown(
-                    f'<div style="text-align:right;font-size:15px;font-weight:700;'
-                    f'color:{badge_color[0]};background:{badge_color[1]};'
-                    f'border:1px solid {badge_color[2]};border-radius:4px;padding:4px 12px;">'
+                    f'<div style="text-align:right;font-size:14px;font-weight:600;'
+                    f'color:{badge[0]};background:{badge[1]};'
+                    f'border:1px solid {badge[2]};border-radius:4px;padding:3px 12px">'
                     f'{score}%</div>',
                     unsafe_allow_html=True
                 )
 
-            # ── meta row
             c1, c2, c3 = st.columns(3)
-            c1.markdown(f'<div class="meta-item">🧠 Semantic fit&nbsp; <b>{sem}%</b></div>', unsafe_allow_html=True)
-            c2.markdown(f'<div class="meta-item">🛠 Skill match&nbsp; <b>{skl}%</b></div>', unsafe_allow_html=True)
-            c3.markdown(f'<div class="meta-item">📅 Experience&nbsp; <b>{exp} yrs</b></div>', unsafe_allow_html=True)
+            c1.markdown(f'<div style="font-size:12px;color:#7a7a72;margin-top:8px">Semantic fit&nbsp; <b style="color:#2e2e2e">{sem}%</b></div>', unsafe_allow_html=True)
+            c2.markdown(f'<div style="font-size:12px;color:#7a7a72;margin-top:8px">Skill match&nbsp; <b style="color:#2e2e2e">{skl}%</b></div>', unsafe_allow_html=True)
+            c3.markdown(f'<div style="font-size:12px;color:#7a7a72;margin-top:8px">Experience&nbsp; <b style="color:#2e2e2e">{exp} yrs</b></div>', unsafe_allow_html=True)
 
-            # ── score bar
             st.markdown(
-                f'<div class="bar-track"><div style="height:5px;border-radius:3px;'
-                f'background:{bar_color};width:{min(score,100)}%"></div></div>',
+                f'<div style="background:#ede9df;border-radius:2px;height:4px;width:100%;margin:10px 0">'
+                f'<div style="height:4px;border-radius:2px;background:{bar_color};width:{min(score,100)}%"></div>'
+                f'</div>',
                 unsafe_allow_html=True
             )
 
-            # ── matched skills
             matched = r["Matched Skills"]
-            st.markdown(f'<div class="skills-section-label">Matched skills ({len(matched)})</div>', unsafe_allow_html=True)
             if matched:
                 st.markdown(
-                    '<div class="skills-row">'
-                    + "".join(f'<span class="skill-tag">{s}</span>' for s in matched)
-                    + "</div>",
+                    f'<div style="font-size:12px;color:#7a7a72;margin:6px 0 4px">Matched skills ({len(matched)})</div>'
+                    + '<div>'
+                    + "".join(f'<span style="font-size:11px;color:#3a6b5a;background:#E5EEE4;border:1px solid #cdd8cc;border-radius:3px;padding:2px 8px;display:inline-block;margin:2px 3px 2px 0">{s}</span>' for s in matched)
+                    + '</div>',
                     unsafe_allow_html=True
                 )
-            else:
-                st.markdown('<div style="color:#7a7a72;font-size:12px">None found</div>', unsafe_allow_html=True)
 
-            # ── skill gaps
             missing = r["Missing Skills"]
             if missing:
-                st.markdown(f'<div class="skills-section-label">Skill gaps ({len(missing)})</div>', unsafe_allow_html=True)
                 st.markdown(
-                    '<div class="skills-row">'
-                    + "".join(f'<span class="skill-tag miss">{s}</span>' for s in missing)
-                    + "</div>",
+                    f'<div style="font-size:12px;color:#7a7a72;margin:8px 0 4px">Skill gaps ({len(missing)})</div>'
+                    + '<div>'
+                    + "".join(f'<span style="font-size:11px;color:#7a7a72;background:transparent;border:1px dashed #d8d4c8;border-radius:3px;padding:2px 8px;display:inline-block;margin:2px 3px 2px 0">{s}</span>' for s in missing)
+                    + '</div>',
                     unsafe_allow_html=True
                 )
 
-            # ── card close
             st.markdown("</div>", unsafe_allow_html=True)
             st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
 
@@ -711,13 +716,15 @@ for jd_name, results in all_results.items():
 
         st.dataframe(df, use_container_width=True, hide_index=True)
 
-    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+    st.markdown('<div style="height:1px;background:#d8d4c8;margin:24px 0"></div>', unsafe_allow_html=True)
 
 # ── Footer ────────────────────────────────────────────────────────────────────
 
-st.markdown("""
-<div class="app-footer">
-  <span>HireMatch — powered by BERT · sentence-transformers</span>
-  <span>Results are ranked by semantic fit + skill coverage</span>
-</div>
-""", unsafe_allow_html=True)
+st.markdown(
+    '<div style="margin-top:48px;padding-top:18px;border-top:1px solid #d8d4c8;'
+    'font-size:12px;color:#7a7a72;display:flex;justify-content:space-between">'
+    '<span>HireMatch · Internal recruiting workspace</span>'
+    f'<span>Signed in as {display} ({role})</span>'
+    '</div>',
+    unsafe_allow_html=True
+)
