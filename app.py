@@ -17,6 +17,71 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+# ── Users ─────────────────────────────────────────────────────────────────────
+
+USERS = {
+    "admin":   "admin123",
+    "hr":      "hr2024",
+    "manager": "manager123",
+}
+
+# ── Login ─────────────────────────────────────────────────────────────────────
+
+if "logged_in" not in st.session_state:
+    st.session_state["logged_in"] = False
+
+if not st.session_state["logged_in"]:
+    st.markdown("""
+    <style>
+      .login-wrap {
+        max-width: 380px;
+        margin: 80px auto 0;
+        background: #fff;
+        border: 1px solid #d8d4c8;
+        border-radius: 8px;
+        padding: 36px 32px 32px;
+      }
+      .login-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #2e2e2e;
+        margin-bottom: 4px;
+      }
+      .login-sub {
+        font-size: 13px;
+        color: #7a7a72;
+        margin-bottom: 24px;
+      }
+      .login-err {
+        font-size: 13px;
+        color: #c0392b;
+        background: #fdf0ee;
+        border: 1px solid #e8b4ae;
+        border-radius: 5px;
+        padding: 8px 12px;
+        margin-top: 12px;
+      }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<div class="login-wrap">', unsafe_allow_html=True)
+    st.markdown('<div class="login-title">HireMatch 🎯</div>', unsafe_allow_html=True)
+    st.markdown('<div class="login-sub">Sign in to access the resume screener</div>', unsafe_allow_html=True)
+
+    username = st.text_input("Username", placeholder="Enter username")
+    password = st.text_input("Password", placeholder="Enter password", type="password")
+
+    if st.button("Sign in", use_container_width=True):
+        if username in USERS and USERS[username] == password:
+            st.session_state["logged_in"] = True
+            st.session_state["username"] = username
+            st.rerun()
+        else:
+            st.markdown('<div class="login-err">Incorrect username or password.</div>', unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.stop()
+
 st.markdown("""
 <style>
   html, body,
@@ -298,21 +363,28 @@ def to_excel(all_results: dict) -> bytes:
 
 # ── Hero ─────────────────────────────────────────────────────────────────────
 
-st.markdown("""
-<div class="hero">
-  <div class="hero-title">HireMatch 🎯</div>
-  <div class="hero-sub">
-    Screen resumes in seconds. Rank candidates by semantic fit and skill coverage — not just keyword count.
-  </div>
-  <div class="hero-pills">
-    <span class="hero-pill">🧠 BERT-powered matching</span>
-    <span class="hero-pill">📄 PDF · DOCX · TXT</span>
-    <span class="hero-pill">🛠 Skill gap analysis</span>
-    <span class="hero-pill">📧 Email extraction</span>
-    <span class="hero-pill">📊 Export to Excel</span>
-  </div>
-</div>
-""", unsafe_allow_html=True)
+hero_left, hero_right = st.columns([5, 1])
+with hero_left:
+    st.markdown("""
+    <div class="hero">
+      <div class="hero-title">HireMatch 🎯</div>
+      <div class="hero-sub">
+        Screen resumes in seconds. Rank candidates by semantic fit and skill coverage — not just keyword count.
+      </div>
+      <div class="hero-pills">
+        <span class="hero-pill">🧠 BERT-powered matching</span>
+        <span class="hero-pill">📄 PDF · DOCX · TXT</span>
+        <span class="hero-pill">🛠 Skill gap analysis</span>
+        <span class="hero-pill">📧 Email extraction</span>
+        <span class="hero-pill">📊 Export to Excel</span>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+with hero_right:
+    st.markdown(f'<div style="text-align:right;font-size:13px;color:#7a7a72;padding-top:8px">👤 {st.session_state.get("username","")}</div>', unsafe_allow_html=True)
+    if st.button("Sign out", key="logout"):
+        st.session_state.clear()
+        st.rerun()
 
 # ── How it works ─────────────────────────────────────────────────────────────
 
