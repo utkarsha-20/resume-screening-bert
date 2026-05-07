@@ -64,13 +64,20 @@ if not st.session_state["logged_in"]:
     </style>
     """, unsafe_allow_html=True)
 
+    st.markdown("""
+    <div style="
+        background:#DC9B9B;
+        padding: 40px 0 32px;
+        text-align:center;
+        margin: 0 -48px 32px;
+    ">
+        <div style="font-size:28px;font-weight:700;color:#fff;margin-bottom:6px">HireMatch 🎯</div>
+        <div style="font-size:14px;color:#fff;opacity:0.88">Sign in to access the resume screener</div>
+    </div>
+    """, unsafe_allow_html=True)
+
     _, col, _ = st.columns([1, 2, 1])
     with col:
-        st.markdown('<div class="login-wrap">', unsafe_allow_html=True)
-        st.markdown('<div class="login-title">HireMatch 🎯</div>', unsafe_allow_html=True)
-        st.markdown('<div class="login-sub">Sign in to access the resume screener</div>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
         username = st.text_input("Username", placeholder="Enter username")
         password = st.text_input("Password", placeholder="Enter password", type="password")
 
