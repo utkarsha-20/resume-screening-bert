@@ -343,9 +343,48 @@ display  = st.session_state.get("display_name", uname.title())
 role     = st.session_state.get("role", "User")
 initials = (display[:2] if display else uname[:2]).upper()
 
+if "page" not in st.session_state:
+    st.session_state["page"] = "Screening"
+
 # ── Top bar ───────────────────────────────────────────────────────────────────
 
-bar_l, bar_c, bar_r = st.columns([2, 4, 2])
+st.markdown("""
+<style>
+  .nav-btns div[data-testid="stButton"] > button {
+    background: transparent !important;
+    color: #7a7a72 !important;
+    border: none !important;
+    border-bottom: 2px solid transparent !important;
+    border-radius: 0 !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    padding: 6px 4px !important;
+    margin: 0 8px !important;
+    box-shadow: none !important;
+  }
+  .nav-btns div[data-testid="stButton"] > button:hover {
+    color: #2e2e2e !important;
+    background: transparent !important;
+  }
+  .nav-btns .nav-active div[data-testid="stButton"] > button {
+    color: #2e2e2e !important;
+    border-bottom: 2px solid #DC9B9B !important;
+    font-weight: 600 !important;
+  }
+  .signout-btn div[data-testid="stButton"] > button {
+    background: #fff !important;
+    color: #2e2e2e !important;
+    border: 1px solid #d8d4c8 !important;
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    padding: 6px 14px !important;
+  }
+</style>
+""", unsafe_allow_html=True)
+
+bar_l, bar_c, bar_r = st.columns([2, 5, 2])
+
 with bar_l:
     st.markdown(
         '<div style="font-size:18px;font-weight:700;color:#2e2e2e;padding-top:8px">'
@@ -353,16 +392,21 @@ with bar_l:
         '</div>',
         unsafe_allow_html=True
     )
+
 with bar_c:
-    st.markdown(
-        '<div style="display:flex;gap:24px;font-size:13px;padding-top:10px;justify-content:center">'
-        '<span style="color:#2e2e2e;font-weight:500;border-bottom:2px solid #DC9B9B;padding-bottom:6px">Screening</span>'
-        '<span style="color:#7a7a72">Candidates</span>'
-        '<span style="color:#7a7a72">Roles</span>'
-        '<span style="color:#7a7a72">Reports</span>'
-        '</div>',
-        unsafe_allow_html=True
-    )
+    st.markdown('<div class="nav-btns" style="display:flex;justify-content:center;padding-top:4px">', unsafe_allow_html=True)
+    n1, n2, n3, n4 = st.columns(4)
+    pages = [("Screening", n1), ("Candidates", n2), ("Roles", n3), ("Reports", n4)]
+    for label, col in pages:
+        active_cls = "nav-active" if st.session_state["page"] == label else ""
+        with col:
+            st.markdown(f'<div class="{active_cls}">', unsafe_allow_html=True)
+            if st.button(label, key=f"nav_{label}", use_container_width=True):
+                st.session_state["page"] = label
+                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
 with bar_r:
     user_col, btn_col = st.columns([3, 2])
     with user_col:
@@ -379,31 +423,15 @@ with bar_r:
             unsafe_allow_html=True
         )
     with btn_col:
+        st.markdown('<div class="signout-btn">', unsafe_allow_html=True)
         if st.button("Sign out", key="logout"):
             st.session_state.clear()
             st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown('<div style="height:1px;background:#d8d4c8;margin:8px -32px 24px"></div>', unsafe_allow_html=True)
 
-# ── Page header ───────────────────────────────────────────────────────────────
-
-today = datetime.now().strftime("%a, %b %d %Y")
-head_l, head_r = st.columns([3, 1])
-with head_l:
-    st.markdown(
-        f'<div style="font-size:22px;font-weight:600;color:#2e2e2e">Resume screening</div>'
-        f'<div style="font-size:13px;color:#7a7a72;margin-top:2px">'
-        f'Match candidates against one or more job descriptions.</div>',
-        unsafe_allow_html=True
-    )
-with head_r:
-    st.markdown(
-        f'<div style="text-align:right;font-size:12px;color:#7a7a72;padding-top:6px">{today}</div>',
-        unsafe_allow_html=True
-    )
-
-st.markdown('<div style="height:18px"></div>', unsafe_allow_html=True)
-
+current_page = st.session_state["page"]
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -465,6 +493,125 @@ def to_excel(all_results: dict) -> bytes:
             df.to_excel(writer, sheet_name=sheet_name, index=False)
     return buf.getvalue()
 
+
+# ── Page router ──────────────────────────────────────────────────────────────
+
+today = datetime.now().strftime("%a, %b %d %Y")
+
+PAGE_INFO = {
+    "Screening":  ("Resume screening",  "Match candidates against one or more job descriptions."),
+    "Candidates": ("Candidates",        "Browse and search candidates from past screenings."),
+    "Roles":      ("Roles",             "Manage saved job descriptions and role templates."),
+    "Reports":    ("Reports",           "Aggregate metrics across recent screening sessions."),
+}
+title, sub = PAGE_INFO[current_page]
+
+head_l, head_r = st.columns([3, 1])
+with head_l:
+    st.markdown(
+        f'<div style="font-size:22px;font-weight:600;color:#2e2e2e">{title}</div>'
+        f'<div style="font-size:13px;color:#7a7a72;margin-top:2px">{sub}</div>',
+        unsafe_allow_html=True
+    )
+with head_r:
+    st.markdown(
+        f'<div style="text-align:right;font-size:12px;color:#7a7a72;padding-top:6px">{today}</div>',
+        unsafe_allow_html=True
+    )
+st.markdown('<div style="height:18px"></div>', unsafe_allow_html=True)
+
+
+def render_coming_soon(name, lines):
+    st.markdown(
+        f'<div style="background:#fff;border:1px solid #d8d4c8;border-radius:8px;'
+        f'padding:32px 28px;margin-bottom:16px">'
+        f'<div style="font-size:13px;font-weight:600;color:#2e2e2e;margin-bottom:8px">{name}</div>'
+        f'<div style="font-size:13px;color:#7a7a72;line-height:1.6">{lines}</div>'
+        f'<div style="margin-top:14px;font-size:11px;color:#3a6b5a;background:#E5EEE4;'
+        f'border:1px solid #cdd8cc;border-radius:10px;padding:3px 10px;display:inline-block">'
+        f'In development</div>'
+        f'</div>',
+        unsafe_allow_html=True
+    )
+
+
+if current_page == "Candidates":
+    render_coming_soon(
+        "Candidate database",
+        "A unified view of every resume processed across all screening runs. "
+        "Search by name, email, skill or score, and revisit past results without re-uploading."
+    )
+    saved = st.session_state.get("all_results", {})
+    if saved:
+        all_rows = []
+        seen = set()
+        for jd_name, results in saved.items():
+            for r in results:
+                key = (r["Resume"], r["Email"])
+                if key in seen: continue
+                seen.add(key)
+                all_rows.append({
+                    "Resume":      r["Resume"],
+                    "Email":       r["Email"],
+                    "Last role":   jd_name,
+                    "Last score":  r["Final Score (%)"],
+                    "Experience":  r["Years of Experience"],
+                })
+        st.markdown('<div style="font-size:13px;color:#7a7a72;margin-bottom:8px">'
+                    f'Showing {len(all_rows)} unique candidate{"s" if len(all_rows) != 1 else ""} from your most recent session.</div>',
+                    unsafe_allow_html=True)
+        st.dataframe(pd.DataFrame(all_rows), use_container_width=True, hide_index=True)
+    st.stop()
+
+if current_page == "Roles":
+    render_coming_soon(
+        "Role library",
+        "Save commonly used job descriptions as reusable templates. "
+        "Tag by department, seniority, or location and load them into a screening with one click."
+    )
+    saved = st.session_state.get("all_results", {})
+    if saved:
+        st.markdown('<div style="font-size:13px;font-weight:600;color:#2e2e2e;margin:16px 0 8px">Recent roles</div>', unsafe_allow_html=True)
+        for jd_name, results in saved.items():
+            st.markdown(
+                f'<div style="background:#fff;border:1px solid #d8d4c8;border-radius:6px;padding:12px 16px;margin-bottom:6px">'
+                f'<div style="font-size:13px;font-weight:600;color:#2e2e2e">{jd_name}</div>'
+                f'<div style="font-size:12px;color:#7a7a72;margin-top:2px">{len(results)} candidates screened</div>'
+                f'</div>',
+                unsafe_allow_html=True
+            )
+    st.stop()
+
+if current_page == "Reports":
+    render_coming_soon(
+        "Aggregate reports",
+        "Track screening volume, average match quality, and skill-gap trends over time. "
+        "Export hiring funnel data for stakeholder reviews."
+    )
+    saved = st.session_state.get("all_results", {})
+    if saved:
+        total_jds       = len(saved)
+        total_resumes   = sum(len(r) for r in saved.values())
+        total_strong    = sum(1 for results in saved.values() for r in results if r["Final Score (%)"] >= 55)
+        avg_top_score   = round(sum(results[0]["Final Score (%)"] for results in saved.values() if results) / max(total_jds, 1), 2)
+
+        k1, k2, k3, k4 = st.columns(4)
+        for col, label, val in [
+            (k1, "Roles screened",  f"{total_jds}"),
+            (k2, "Resumes processed", f"{total_resumes}"),
+            (k3, "Strong matches", f"{total_strong}"),
+            (k4, "Avg. top score", f"{avg_top_score}%"),
+        ]:
+            col.markdown(
+                f'<div style="background:#fff;border:1px solid #d8d4c8;border-radius:8px;padding:14px 16px">'
+                f'<div style="font-size:12px;color:#7a7a72;margin-bottom:6px">{label}</div>'
+                f'<div style="font-size:22px;font-weight:600;color:#2e2e2e;line-height:1">{val}</div>'
+                f'</div>',
+                unsafe_allow_html=True
+            )
+    st.stop()
+
+# ── Screening page ───────────────────────────────────────────────────────────
 
 # ── Inputs ────────────────────────────────────────────────────────────────────
 
